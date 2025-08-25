@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { studyService } from '../../services/studyService';
-import type { StudyMaterial, Category, Topic } from '../../types';
+import type{ StudyMaterial, Category, Topic } from '../../types';
 import { BookOpen, Download, Play, Filter, AlertCircle } from 'lucide-react';
 
 const StudyMaterials: React.FC = () => {
@@ -77,6 +77,18 @@ const StudyMaterials: React.FC = () => {
       window.URL.revokeObjectURL(url);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to download study material');
+    }
+  };
+
+  const handleView = async (id: string, title: string) => {
+    try {
+      const response = await studyService.viewStudyMaterial(id);
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      window.open(url, '_blank');
+      // Clean up the URL after a delay to prevent memory leaks
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to view study material');
     }
   };
 
@@ -180,6 +192,14 @@ const StudyMaterials: React.FC = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
               <button
+                onClick={() => handleView(material.id, material.title)}
+                className="flex items-center justify-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              >
+                <BookOpen className="h-4 w-4" />
+                <span>View PDF</span>
+              </button>
+              
+              <button
                 onClick={() => handleDownload(material.id, material.title)}
                 className="flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
@@ -189,7 +209,7 @@ const StudyMaterials: React.FC = () => {
               
               <button
                 onClick={() => handleGenerateTest(material.id)}
-                className="flex items-center justify-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                className="flex items-center justify-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
               >
                 <Play className="h-4 w-4" />
                 <span>Generate Test</span>

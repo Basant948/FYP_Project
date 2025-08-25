@@ -1,5 +1,5 @@
 import api from './api';
-import type { Category, Topic, StudyMaterial } from '../types';
+import type{ Category, Topic, StudyMaterial } from '../types';
 
 export interface StudyMaterialParams {
   categoryId?: string;
@@ -28,7 +28,11 @@ export const studyService = {
   downloadStudyMaterial: (id: string) => 
     api.get(`/user/study-materials/${id}/download`, { responseType: 'blob' }),
   
+  viewStudyMaterial: (id: string) => 
+    api.get(`/user/study-materials/${id}/download`, { responseType: 'blob' }),
+  
   generateTest: (id: string) => api.get<TestQuestionDto[]>(`/user/study-materials/${id}/test`),
   
   submitTest: (data: TestSubmissionDto) => api.post('/user/study-materials/test/submit', data),
+  
 };

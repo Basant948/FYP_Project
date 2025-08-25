@@ -10,7 +10,8 @@ import {
   FolderPlus, 
   Upload,
   BarChart3,
-  Eye
+  Eye,
+  Edit
 } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
@@ -18,6 +19,7 @@ const AdminDashboard: React.FC = () => {
   
   const navigation = [
     { name: 'Post Vacancy', href: '/admin/post-vacancy', icon: Plus },
+    { name: 'Update Vacancy', href: '/admin/update-vacancy', icon: Edit },
     { name: 'Manage Vacancies', href: '/admin/manage-vacancies', icon: Settings },
     { name: 'All Users', href: '/admin/users', icon: Users },
     { name: 'Tracked Users', href: '/admin/tracked-users', icon: Eye },

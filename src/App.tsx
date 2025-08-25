@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -19,6 +20,7 @@ import StudyMaterials from './components/user/StudyMaterials';
 
 // Admin Components
 import PostVacancy from './components/admin/PostVacancy';
+import UpdateVacancy from './components/admin/UpdateVacancy';
 import ManageVacancies from './components/admin/ManageVacancies';
 import AllUsers from './components/admin/AllUsers';
 import TrackedUsers from './components/admin/TrackedUsers';
@@ -60,6 +62,7 @@ function App() {
             }
           >
             <Route path="post-vacancy" element={<PostVacancy />} />
+            <Route path="update-vacancy" element={<UpdateVacancy />} />
             <Route path="manage-vacancies" element={<ManageVacancies />} />
             <Route path="users" element={<AllUsers />} />
             <Route path="tracked-users" element={<TrackedUsers />} />

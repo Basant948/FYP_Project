@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { studyService } from '../../services/studyService';
 import { adminService } from '../../services/adminService';
-import type { Category, Topic } from '../../types';
+import type{ Category, Topic } from '../../types';
 import { Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
 
 const UploadMaterial: React.FC = () => {
@@ -48,44 +48,63 @@ const UploadMaterial: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      setError('Please select a PDF file to upload');
-      return;
+        setError('Please select a PDF file to upload');
+        return;
     }
-
+    if (!form.categoryId && !form.topicId) {
+        setError('Please select either a category or topic');
+        return;
+    }
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      await adminService.uploadStudyMaterial({
-        title: form.title,
-        categoryId: form.categoryId || undefined,
-        topicId: form.topicId || undefined,
-        file,
-      });
-      
-      setSuccess('Study material uploaded successfully!');
-      setForm({ title: '', categoryId: '', topicId: '' });
-      setFile(null);
-      
-      // Reset file input
-      const fileInput = document.getElementById('file') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
+        const formData = new FormData();
+        formData.append('title', form.title);
+        if (form.categoryId) formData.append('categoryId', form.categoryId);
+        if (form.topicId) formData.append('topicId', form.topicId);
+        formData.append('file', file);
+
+        // Log FormData contents
+        console.log('FormData contents:');
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value instanceof File ? value.name : value}`);
+        }
+
+        await adminService.uploadStudyMaterial({
+            title: form.title,
+            categoryId: form.categoryId || undefined,
+            topicId: form.topicId || undefined,
+            file,
+        });
+        setSuccess('Study material uploaded successfully!');
+        setForm({ title: '', categoryId: '', topicId: '' });
+        setFile(null);
+        const fileInput = document.getElementById('file') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to upload study material');
+        console.error('Upload error:', err);
+        setError(err.response?.data?.message || 'Failed to upload study material');
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       if (selectedFile.type !== 'application/pdf') {
         setError('Only PDF files are allowed');
+        e.target.value = '';
+        return;
+      }
+      if (selectedFile.size > 10 * 1024 * 1024) { // 10MB limit
+        setError('File size must be less than 10MB');
+        e.target.value = '';
         return;
       }
       setFile(selectedFile);
@@ -226,10 +245,33 @@ const UploadMaterial: React.FC = () => {
         <ul className="text-sm text-blue-800 space-y-1">
           <li>• Only PDF files are accepted</li>
           <li>• Maximum file size: 10MB</li>
-          <li>• Either category or topic must be selected (or both)</li>
+          <li>• At least one of category or topic must be selected</li>
           <li>• Use descriptive titles for better organization</li>
+          <li>• File will be processed and available immediately after upload</li>
         </ul>
       </div>
+
+      {/* Debug Information (remove in production) */}
+      {import.meta.env.DEV && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <h3 className="text-sm font-medium text-gray-900 mb-2">Debug Info:</h3>
+          <div className="text-xs text-gray-600 space-y-1">
+            <p>Selected Category ID: {form.categoryId || 'None'}</p>
+            <p>Selected Topic ID: {form.topicId || 'None'}</p>
+            <p>Selected File: {file?.name || 'None'}</p>
+            <p>File Size: {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'N/A'}</p>
+            <p>Form Data Preview:</p>
+            <pre className="text-xs bg-gray-100 p-2 rounded mt-1">
+              {JSON.stringify({
+                title: form.title,
+                categoryId: form.categoryId || 'undefined',
+                topicId: form.topicId || 'undefined',
+                hasFile: !!file
+              }, null, 2)}
+            </pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
